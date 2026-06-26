@@ -2,7 +2,7 @@ mod sql;
 mod structure;
 
 use crate::{
-    sql::{create_sql, insert_sql},
+    sql::{create_sql, insert_sql, view_all_table},
     structure::LearningList,
 };
 use chrono::Local;
@@ -19,6 +19,15 @@ fn main() -> Result<()> {
         date: Local::now(),
     };
 
-    let _ = insert_sql(learning_list_table, add_list);
+    let _ = insert_sql(&learning_list_table, add_list);
+
+    let all_list = view_all_table(&learning_list_table)?;
+
+    println!("{}", all_list[0].id);
+    println!("{}", all_list[0].url);
+    println!("{}", all_list[0].title);
+    println!("{}", all_list[0].memo);
+    println!("{}", all_list[0].date);
+
     Ok(())
 }
