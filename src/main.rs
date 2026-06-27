@@ -6,7 +6,7 @@ mod structure;
 use crate::{
     cli::Cli,
     fetch::fetch_title,
-    sql::{create_sql, insert_sql, recent_table, select_all_table, view_table},
+    sql::{create_sql, daily_chart, insert_sql, recent_table, select_all_table, view_table},
     structure::LearningList,
 };
 use chrono::Local;
@@ -43,6 +43,10 @@ fn main() -> Result<()> {
         cli::Command::View => {
             let table = recent_table(&learning_list_table)?;
             let _ = view_table(&table);
+        }
+        cli::Command::Chart => {
+            let list = select_all_table(&learning_list_table)?;
+            let _ = daily_chart(&list);
         }
     }
 

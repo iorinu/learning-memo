@@ -26,4 +26,7 @@ pub enum Command {
     #[command(alias = "v")]
     #[command(alias = "ls")]
     View,
+
+    #[command(alias = "c")]
+    Chart,
 }

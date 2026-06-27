@@ -1,5 +1,7 @@
 use crate::structure::LearningList;
+use std::collections::BTreeMap;
 
+use chrono::NaiveDate;
 use rusqlite::{Connection, Result};
 
 pub fn create_sql() -> Result<Connection> {
@@ -52,6 +54,7 @@ pub fn view_table(list: &Vec<LearningList>) -> Result<()> {
         println!("{}", list[i].title);
         println!("{}", list[i].memo);
         println!("{}", list[i].date);
+        println!("-------------------------------------------------");
     }
     Ok(())
 }
@@ -76,4 +79,19 @@ pub fn recent_table(list: &Connection) -> Result<Vec<LearningList>> {
         view_list.push(item?);
     }
     Ok(view_list)
+}
+
+pub fn daily_chart(list: &Vec<LearningList>) -> Result<(), Box<dyn std::error::Error>> {
+    let mut counts: BTreeMap<NaiveDate, usize> = BTreeMap::new();
+    for item in list {
+        *counts.entry(item.date).or_insert(0) += 1;
+    }
+
+    let max = counts.values().max().copied().unwrap_or(1);
+    for (date, count) in &counts {
+        let bar_width = count * 40 / max;
+        let bar = "⬛︎".repeat(bar_width);
+        println!("{}, {}, {}", date, bar, count)
+    }
+    Ok(())
 }
