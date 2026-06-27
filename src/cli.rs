@@ -13,10 +13,16 @@ pub enum Command {
     #[command(alias = "a")]
     Add {
         url: String,
-        title: String,
+        #[arg(short, long)]
+        title: Option<String>,
+        #[arg(short, long, default_value(""))]
         memo: String,
     },
     //view all table
     #[command(alias = "all")]
     Allview,
+
+    #[command(alias = "v")]
+    #[command(alias = "ls")]
+    View,
 }

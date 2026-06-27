@@ -55,3 +55,25 @@ pub fn view_table(list: &Vec<LearningList>) -> Result<()> {
     }
     Ok(())
 }
+
+pub fn recent_table(list: &Connection) -> Result<Vec<LearningList>> {
+    let mut stmt = list.prepare(
+        "SELECT id, url, title, memo, date FROM learning_list 
+        ORDER BY id DESC LIMIT 10",
+    )?;
+    let rows = stmt.query_map([], |row| {
+        Ok(LearningList {
+            id: row.get(0)?,
+            url: row.get(1)?,
+            title: row.get(2)?,
+            memo: row.get(3)?,
+            date: row.get(4)?,
+        })
+    })?;
+
+    let mut view_list = Vec::new();
+    for item in rows {
+        view_list.push(item?);
+    }
+    Ok(view_list)
+}

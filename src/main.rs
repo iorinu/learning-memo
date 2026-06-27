@@ -1,12 +1,12 @@
 mod cli;
+mod fetch;
 mod sql;
 mod structure;
 
-use std::ops::Add;
-
 use crate::{
     cli::Cli,
-    sql::{create_sql, insert_sql, select_all_table, view_table},
+    fetch::fetch_title,
+    sql::{create_sql, insert_sql, recent_table, select_all_table, view_table},
     structure::LearningList,
 };
 use chrono::Local;
@@ -14,12 +14,17 @@ use clap::Parser;
 use rusqlite::Result;
 
 fn main() -> Result<()> {
-    let mut learning_list_table = create_sql()?;
+    let learning_list_table = create_sql()?;
 
     let cli = Cli::parse();
 
     match cli.command {
         cli::Command::Add { url, title, memo } => {
+            let title = match title {
+                Some(t) => t,
+                None => fetch_title(&url).unwrap_or_else(|_| "取得失敗".to_string()),
+            };
+
             let add_list = LearningList {
                 //idは無視される
                 id: 0,
@@ -32,8 +37,12 @@ fn main() -> Result<()> {
             let _ = insert_sql(&learning_list_table, add_list);
         }
         cli::Command::Allview => {
-            let all_tavle = select_all_table(&learning_list_table)?;
-            let _ = view_table(&all_tavle);
+            let all_table = select_all_table(&learning_list_table)?;
+            let _ = view_table(&all_table);
+        }
+        cli::Command::View => {
+            let table = recent_table(&learning_list_table)?;
+            let _ = view_table(&table);
         }
     }
 
