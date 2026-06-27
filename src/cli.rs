@@ -20,6 +20,7 @@ pub enum Command {
     },
     //view all table
     #[command(alias = "all")]
+    #[command(alias = "la")]
     Allview,
 
     #[command(alias = "v")]

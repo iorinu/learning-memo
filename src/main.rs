@@ -31,7 +31,7 @@ fn main() -> Result<()> {
                 url,
                 title,
                 memo,
-                date: Local::now(),
+                date: Local::now().date_naive(),
             };
 
             let _ = insert_sql(&learning_list_table, add_list);
