@@ -5,7 +5,7 @@ use chrono::NaiveDate;
 use rusqlite::{Connection, Result};
 
 pub fn create_sql() -> Result<Connection> {
-    let conn = Connection::open("learning_list.db")?;
+    let conn = Connection::open("learning_memo.db")?;
     conn.execute(
         "CREATE TABLE IF NOT EXISTS learning_list (
             id    INTEGER PRIMARY KEY,

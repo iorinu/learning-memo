@@ -1,7 +1,11 @@
 [package]
-name = "learning-list"
+name = "learning-memo"
 version = "0.1.0"
 edition = "2024"
+
+[[bin]]
+name = "lmemo"
+path = "src/main.rs"
 
 [dependencies]
 rusqlite = { version = "0.40.1", features = ["chrono"] }

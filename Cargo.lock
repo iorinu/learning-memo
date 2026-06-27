@@ -362,7 +362,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "learning-list"
+name = "learning-memo"
 version = "0.1.0"
 dependencies = [
  "chrono",
