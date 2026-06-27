@@ -118,3 +118,28 @@ pub fn daily_chart(list: &[LearningList]) -> Result<(), Box<dyn std::error::Erro
     }
     Ok(())
 }
+
+pub fn view_all_site(list: &Connection) -> Result<()> {
+    let mut stmt = list.prepare(
+        "SELECT domain, COUNT(*) FROM learning_list
+        GROUP BY domain ORDER BY COUNT(*) DESC",
+    )?;
+
+    let rows = stmt.query_map([], |row| {
+        let domain: String = row.get(0)?;
+        let count: i64 = row.get(1)?;
+        Ok((domain, count))
+    })?;
+
+    let mut printed = false;
+    for row in rows {
+        let (domain, count) = row?;
+        println!("{:20} {}", domain, count);
+        printed = true;
+    }
+
+    if !printed {
+        println!("データなし");
+    }
+    Ok(())
+}

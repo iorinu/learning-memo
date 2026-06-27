@@ -21,7 +21,10 @@ pub enum Command {
     //view all table
     #[command(alias = "all")]
     #[command(alias = "la")]
-    Allview,
+    Allview {
+        #[arg(short, long, default_value(""))]
+        site: String,
+    },
 
     #[command(alias = "v")]
     #[command(alias = "ls")]
@@ -29,4 +32,7 @@ pub enum Command {
 
     #[command(alias = "c")]
     Chart,
+
+    #[command(alias = "sv")]
+    SiteView,
 }

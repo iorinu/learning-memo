@@ -6,14 +6,17 @@ mod structure;
 use crate::{
     cli::Cli,
     fetch::{fetch_domain, fetch_title},
-    sql::{create_sql, daily_chart, insert_sql, recent_table, select_all_table, view_table},
+    sql::{
+        create_sql, daily_chart, insert_sql, recent_table, select_all_table, view_all_site,
+        view_table,
+    },
     structure::LearningList,
 };
 use chrono::Local;
 use clap::Parser;
 use rusqlite::Result;
 
-fn main() -> Result<()> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let learning_list_table = create_sql()?;
 
     let cli = Cli::parse();
@@ -37,19 +40,23 @@ fn main() -> Result<()> {
                 domain,
             };
 
-            let _ = insert_sql(&learning_list_table, add_list);
+            insert_sql(&learning_list_table, add_list)?;
         }
-        cli::Command::Allview => {
+        cli::Command::Allview { site } => {
+            //TODO
             let all_table = select_all_table(&learning_list_table)?;
-            let _ = view_table(&all_table);
+            view_table(&all_table)?;
         }
         cli::Command::View => {
             let table = recent_table(&learning_list_table)?;
-            let _ = view_table(&table);
+            view_table(&table)?;
         }
         cli::Command::Chart => {
             let list = select_all_table(&learning_list_table)?;
-            let _ = daily_chart(&list);
+            daily_chart(&list)?;
+        }
+        cli::Command::SiteView => {
+            view_all_site(&learning_list_table)?;
         }
     }
 
