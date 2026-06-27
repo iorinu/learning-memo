@@ -1,5 +1,4 @@
 use regex::Regex;
-use ureq;
 
 pub fn fetch_title(url: &String) -> Result<String, Box<dyn std::error::Error>> {
     let html = ureq::get(url).call()?.body_mut().read_to_string()?;
