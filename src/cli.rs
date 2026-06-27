@@ -22,8 +22,8 @@ pub enum Command {
     #[command(alias = "all")]
     #[command(alias = "la")]
     Allview {
-        #[arg(short, long, default_value(""))]
-        site: String,
+        #[arg(short, long)]
+        site: Option<String>,
     },
 
     #[command(alias = "v")]

@@ -7,8 +7,8 @@ use crate::{
     cli::Cli,
     fetch::{fetch_domain, fetch_title},
     sql::{
-        create_sql, daily_chart, insert_sql, recent_table, select_all_table, view_all_site,
-        view_table,
+        create_sql, daily_chart, insert_sql, recent_table, select_all_table, select_domain_table,
+        view_all_site, view_table,
     },
     structure::LearningList,
 };
@@ -43,9 +43,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             insert_sql(&learning_list_table, add_list)?;
         }
         cli::Command::Allview { site } => {
-            //TODO
-            let all_table = select_all_table(&learning_list_table)?;
-            view_table(&all_table)?;
+            let list = match site {
+                Some(s) => select_domain_table(&learning_list_table, &s)?,
+                None => select_all_table(&learning_list_table)?,
+            };
+            view_table(&list)?;
         }
         cli::Command::View => {
             let table = recent_table(&learning_list_table)?;

@@ -143,3 +143,29 @@ pub fn view_all_site(list: &Connection) -> Result<()> {
     }
     Ok(())
 }
+
+pub fn select_domain_table(
+    list: &Connection,
+    domain: &String,
+) -> Result<Vec<LearningList>, Box<dyn std::error::Error>> {
+    let mut stmt = list.prepare(
+        "SELECT id, url, title, memo, date, domain FROM learning_list \
+         WHERE domain = ?1 ORDER BY id DESC",
+    )?;
+    let rows = stmt.query_map([domain], |row| {
+        Ok(LearningList {
+            id: row.get(0)?,
+            url: row.get(1)?,
+            title: row.get(2)?,
+            memo: row.get(3)?,
+            date: row.get(4)?,
+            domain: row.get(5)?,
+        })
+    })?;
+
+    let mut list = Vec::new();
+    for item in rows {
+        list.push(item?);
+    }
+    Ok(list)
+}
