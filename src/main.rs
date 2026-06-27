@@ -5,7 +5,7 @@ mod structure;
 
 use crate::{
     cli::Cli,
-    fetch::fetch_title,
+    fetch::{fetch_domain, fetch_title},
     sql::{create_sql, daily_chart, insert_sql, recent_table, select_all_table, view_table},
     structure::LearningList,
 };
@@ -25,6 +25,8 @@ fn main() -> Result<()> {
                 None => fetch_title(&url).unwrap_or_else(|_| "取得失敗".to_string()),
             };
 
+            let domain = fetch_domain(&url);
+
             let add_list = LearningList {
                 //idは無視される
                 id: 0,
@@ -32,6 +34,7 @@ fn main() -> Result<()> {
                 title,
                 memo,
                 date: Local::now().date_naive(),
+                domain,
             };
 
             let _ = insert_sql(&learning_list_table, add_list);

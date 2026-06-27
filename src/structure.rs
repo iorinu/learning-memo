@@ -6,4 +6,5 @@ pub struct LearningList {
     pub title: String,
     pub memo: String,
     pub date: NaiveDate,
+    pub domain: String,
 }

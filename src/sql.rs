@@ -12,7 +12,8 @@ pub fn create_sql() -> Result<Connection> {
             url TEXT,
             title TEXT,
             memo TEXT,
-            date TEXT
+            date TEXT,
+            domain TEXT
         )",
         (), // empty list of parameters.
     )?;
@@ -21,14 +22,20 @@ pub fn create_sql() -> Result<Connection> {
 
 pub fn insert_sql(list: &Connection, add_list: LearningList) -> Result<()> {
     list.execute(
-        "INSERT INTO learning_list (url, title, memo, date) VALUES (?1, ?2, ?3, ?4)",
-        (add_list.url, add_list.title, add_list.memo, add_list.date),
+        "INSERT INTO learning_list (url, title, memo, date, domain) VALUES (?1, ?2, ?3, ?4, ?5)",
+        (
+            add_list.url,
+            add_list.title,
+            add_list.memo,
+            add_list.date,
+            add_list.domain,
+        ),
     )?;
     Ok(())
 }
 
 pub fn select_all_table(list: &Connection) -> Result<Vec<LearningList>> {
-    let mut stmt = list.prepare("SELECT id, url, title, memo, date FROM learning_list")?;
+    let mut stmt = list.prepare("SELECT id, url, title, memo, date, domain FROM learning_list")?;
     let rows = stmt.query_map([], |row| {
         Ok(LearningList {
             id: row.get(0)?,
@@ -36,6 +43,7 @@ pub fn select_all_table(list: &Connection) -> Result<Vec<LearningList>> {
             title: row.get(2)?,
             memo: row.get(3)?,
             date: row.get(4)?,
+            domain: row.get(5)?,
         })
     })?;
 
@@ -61,7 +69,7 @@ pub fn view_table(list: &[LearningList]) -> Result<()> {
 
 pub fn recent_table(list: &Connection) -> Result<Vec<LearningList>> {
     let mut stmt = list.prepare(
-        "SELECT id, url, title, memo, date FROM learning_list 
+        "SELECT id, url, title, memo, date, domain FROM learning_list 
         ORDER BY id DESC LIMIT 10",
     )?;
     let rows = stmt.query_map([], |row| {
@@ -71,6 +79,7 @@ pub fn recent_table(list: &Connection) -> Result<Vec<LearningList>> {
             title: row.get(2)?,
             memo: row.get(3)?,
             date: row.get(4)?,
+            domain: row.get(5)?,
         })
     })?;
 
