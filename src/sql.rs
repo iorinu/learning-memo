@@ -25,7 +25,7 @@ pub fn insert_sql(list: &Connection, add_list: LearningList) -> Result<()> {
     Ok(())
 }
 
-pub fn view_all_table(list: &Connection) -> Result<Vec<LearningList>> {
+pub fn select_all_table(list: &Connection) -> Result<Vec<LearningList>> {
     let mut stmt = list.prepare("SELECT id, url, title, memo, date FROM learning_list")?;
     let rows = stmt.query_map([], |row| {
         Ok(LearningList {
@@ -42,4 +42,16 @@ pub fn view_all_table(list: &Connection) -> Result<Vec<LearningList>> {
         view_list.push(item?);
     }
     Ok(view_list)
+}
+
+pub fn view_table(list: &Vec<LearningList>) -> Result<()> {
+    let list_len = list.len();
+    for i in 0..list_len {
+        println!("{}", list[i].id);
+        println!("{}", list[i].url);
+        println!("{}", list[i].title);
+        println!("{}", list[i].memo);
+        println!("{}", list[i].date);
+    }
+    Ok(())
 }
