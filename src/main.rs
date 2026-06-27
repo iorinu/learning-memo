@@ -13,7 +13,8 @@ use crate::{
     structure::LearningList,
 };
 use chrono::Local;
-use clap::Parser;
+use clap::{CommandFactory, Parser};
+use clap_complete::generate;
 use rusqlite::Result;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -59,6 +60,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         cli::Command::SiteView => {
             view_all_site(&learning_list_table)?;
+        }
+        cli::Command::Completion { shell } => {
+            let mut cmd = Cli::command();
+            let name = cmd.get_name().to_string();
+            generate(shell, &mut cmd, name, &mut std::io::stdout());
         }
     }
 

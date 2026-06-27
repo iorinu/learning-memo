@@ -1,11 +1,21 @@
 use crate::structure::LearningList;
 use std::collections::BTreeMap;
+use std::path::PathBuf;
 
 use chrono::{Local, NaiveDate};
 use rusqlite::{Connection, Result};
 
+// DB保存先のパス
+fn db_path() -> PathBuf {
+    let mut path = dirs::data_dir().unwrap_or_else(|| PathBuf::from("."));
+    path.push("lmemo");
+    let _ = std::fs::create_dir_all(&path);
+    path.push("learning_memo.db");
+    path
+}
+
 pub fn create_sql() -> Result<Connection> {
-    let conn = Connection::open("learning_memo.db")?;
+    let conn = Connection::open(db_path())?;
     conn.execute(
         "CREATE TABLE IF NOT EXISTS learning_list (
             id    INTEGER PRIMARY KEY,
@@ -15,7 +25,7 @@ pub fn create_sql() -> Result<Connection> {
             date TEXT,
             domain TEXT
         )",
-        (), // empty list of parameters.
+        (),
     )?;
     Ok(conn)
 }

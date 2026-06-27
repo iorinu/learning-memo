@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand};
+use clap_complete::Shell;
 
 #[derive(Parser)]
 #[command(name = "lmemo", version, about = "cli learning memo")]
@@ -9,7 +10,6 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Command {
-    //add learning list
     #[command(alias = "a")]
     Add {
         url: String,
@@ -18,7 +18,7 @@ pub enum Command {
         #[arg(short, long, default_value(""))]
         memo: String,
     },
-    //view all table
+
     #[command(alias = "all")]
     #[command(alias = "la")]
     Allview {
@@ -35,4 +35,7 @@ pub enum Command {
 
     #[command(alias = "sv")]
     SiteView,
+
+    /// シェル補完スクリプトを生成
+    Completion { shell: Shell },
 }
