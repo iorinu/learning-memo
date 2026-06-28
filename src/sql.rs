@@ -2,7 +2,7 @@ use crate::structure::LearningList;
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
-ust chrono::{Local, NaiveDate};
+use chrono::{Local, NaiveDate};
 use rusqlite::{Connection, Result};
 
 // DB保存先のパス
