@@ -14,7 +14,7 @@ fn db_path() -> PathBuf {
     path
 }
 
-pub fn create_sql() -> Result<Connection> {
+pub(crate) fn create_sql() -> Result<Connection> {
     let conn = Connection::open(db_path())?;
     conn.execute(
         "CREATE TABLE IF NOT EXISTS learning_list (
@@ -30,7 +30,7 @@ pub fn create_sql() -> Result<Connection> {
     Ok(conn)
 }
 
-pub fn insert_sql(list: &Connection, add_list: LearningList) -> Result<()> {
+pub(crate) fn insert_sql(list: &Connection, add_list: LearningList) -> Result<()> {
     list.execute(
         "INSERT INTO learning_list (url, title, memo, date, domain) VALUES (?1, ?2, ?3, ?4, ?5)",
         (
@@ -44,7 +44,7 @@ pub fn insert_sql(list: &Connection, add_list: LearningList) -> Result<()> {
     Ok(())
 }
 
-pub fn select_all_table(list: &Connection) -> Result<Vec<LearningList>> {
+pub(crate) fn select_all_table(list: &Connection) -> Result<Vec<LearningList>> {
     let mut stmt = list.prepare("SELECT id, url, title, memo, date, domain FROM learning_list")?;
     let rows = stmt.query_map([], |row| {
         Ok(LearningList {
@@ -64,20 +64,20 @@ pub fn select_all_table(list: &Connection) -> Result<Vec<LearningList>> {
     Ok(view_list)
 }
 
-pub fn view_table(list: &[LearningList]) -> Result<()> {
+pub(crate) fn view_table(list: &[LearningList]) -> Result<()> {
     let list_len = list.len();
-    for i in 0..list_len {
-        println!("{}", list[i].id);
-        println!("{}", list[i].url);
-        println!("{}", list[i].title);
-        println!("{}", list[i].memo);
-        println!("{}", list[i].date);
+    for item in list.iter().take(list_len) {
+        println!("{}", item.id);
+        println!("{}", item.url);
+        println!("{}", item.title);
+        println!("{}", item.date);
+        println!("{}", item.domain);
         println!("-------------------------------------------------");
     }
     Ok(())
 }
 
-pub fn recent_table(list: &Connection) -> Result<Vec<LearningList>> {
+pub(crate) fn recent_table(list: &Connection) -> Result<Vec<LearningList>> {
     let mut stmt = list.prepare(
         "SELECT id, url, title, memo, date, domain FROM learning_list 
         ORDER BY id DESC LIMIT 10",
@@ -100,7 +100,7 @@ pub fn recent_table(list: &Connection) -> Result<Vec<LearningList>> {
     Ok(view_list)
 }
 
-pub fn daily_chart(list: &[LearningList]) -> Result<(), Box<dyn std::error::Error>> {
+pub(crate) fn daily_chart(list: &[LearningList]) -> Result<(), Box<dyn std::error::Error>> {
     if list.is_empty() {
         println!("データなし");
         return Ok(());
@@ -129,7 +129,7 @@ pub fn daily_chart(list: &[LearningList]) -> Result<(), Box<dyn std::error::Erro
     Ok(())
 }
 
-pub fn view_all_site(list: &Connection) -> Result<()> {
+pub(crate) fn view_all_site(list: &Connection) -> Result<()> {
     let mut stmt = list.prepare(
         "SELECT domain, COUNT(*) FROM learning_list
         GROUP BY domain ORDER BY COUNT(*) DESC",
@@ -154,7 +154,7 @@ pub fn view_all_site(list: &Connection) -> Result<()> {
     Ok(())
 }
 
-pub fn select_domain_table(
+pub(crate) fn select_domain_table(
     list: &Connection,
     domain: &String,
 ) -> Result<Vec<LearningList>, Box<dyn std::error::Error>> {

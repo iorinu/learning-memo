@@ -3,7 +3,7 @@ use std::sync::LazyLock;
 
 static DOMAIN_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^https?://([^/:?#]+)").unwrap());
 
-pub fn fetch_title(url: &String) -> Result<String, Box<dyn std::error::Error>> {
+pub(crate) fn fetch_title(url: &String) -> Result<String, Box<dyn std::error::Error>> {
     let html = ureq::get(url).call()?.body_mut().read_to_string()?;
     let re = Regex::new(r"(?is)<title[^>]*>(.*?)</title>")?;
     let title = re
@@ -15,7 +15,7 @@ pub fn fetch_title(url: &String) -> Result<String, Box<dyn std::error::Error>> {
     Ok(title)
 }
 
-pub fn fetch_domain(url: &String) -> String {
+pub(crate) fn fetch_domain(url: &str) -> String {
     DOMAIN_RE
         .captures(url)
         .and_then(|c| c.get(1))
