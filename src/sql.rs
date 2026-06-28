@@ -2,7 +2,7 @@ use crate::structure::LearningList;
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
-use chrono::{Local, NaiveDate};
+ust chrono::{Local, NaiveDate};
 use rusqlite::{Connection, Result};
 
 // DB保存先のパス
@@ -178,4 +178,112 @@ pub fn select_domain_table(
         list.push(item?);
     }
     Ok(list)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::structure::LearningList;
+    use chrono::NaiveDate;
+    use rusqlite::Connection;
+
+    // テスト用のメモリ内DB
+    fn test_conn() -> Connection {
+        let conn = Connection::open_in_memory().unwrap();
+        conn.execute(
+            "CREATE TABLE learning_list (
+                id    INTEGER PRIMARY KEY,
+                url   TEXT,
+                title TEXT,
+                memo  TEXT,
+                date  TEXT,
+                domain TEXT
+            )",
+            (),
+        )
+        .unwrap();
+        conn
+    }
+
+    fn sample(n: i32, domain: &str) -> LearningList {
+        LearningList {
+            id: 0,
+            url: format!("https://{}/page{}", domain, n),
+            title: format!("title {}", n),
+            memo: format!("memo {}", n),
+            date: NaiveDate::from_ymd_opt(2026, 6, 28).unwrap(),
+            domain: domain.to_string(),
+        }
+    }
+
+    // 1件 INSERT して SELECT で取り出し、全フィールドが一致することを確認
+    #[test]
+    fn insert_then_select_all_roundtrip() {
+        let conn = test_conn();
+        insert_sql(&conn, sample(1, "example.com")).unwrap();
+
+        let rows = select_all_table(&conn).unwrap();
+        assert_eq!(rows.len(), 1);
+        assert_eq!(rows[0].url, "https://example.com/page1");
+        assert_eq!(rows[0].title, "title 1");
+        assert_eq!(rows[0].memo, "memo 1");
+        assert_eq!(rows[0].domain, "example.com");
+        assert_eq!(rows[0].date, NaiveDate::from_ymd_opt(2026, 6, 28).unwrap());
+    }
+
+    // 空DBに対する select_all_table は空 Vec を返すべき
+    #[test]
+    fn select_all_returns_empty_on_empty_db() {
+        let conn = test_conn();
+        let rows = select_all_table(&conn).unwrap();
+        assert!(rows.is_empty());
+    }
+
+    // 15件入れて、LIMIT 10 と id降順が効いているかを確認
+    #[test]
+    fn recent_table_returns_at_most_10_in_desc_order() {
+        let conn = test_conn();
+        for i in 0..15 {
+            insert_sql(&conn, sample(i, "example.com")).unwrap();
+        }
+
+        let rows = recent_table(&conn).unwrap();
+        assert_eq!(rows.len(), 10, "LIMIT 10 が効いていない");
+
+        // ids がすでに降順になっているか：自分自身をソートしたものと比較する
+        let ids: Vec<i32> = rows.iter().map(|r| r.id).collect();
+        let mut expected = ids.clone();
+        expected.sort_by(|a, b| b.cmp(a)); // 降順ソート
+        assert_eq!(ids, expected, "id 降順になっていない");
+    }
+
+    #[test]
+    fn recent_table_empty_db() {
+        let conn = test_conn();
+        let rows = recent_table(&conn).unwrap();
+        assert!(rows.is_empty());
+    }
+
+    // 3ドメイン分入れて、指定したドメインだけ返ることを確認
+    #[test]
+    fn select_domain_table_filters_by_domain() {
+        let conn = test_conn();
+        insert_sql(&conn, sample(1, "example.com")).unwrap();
+        insert_sql(&conn, sample(2, "example.com")).unwrap();
+        insert_sql(&conn, sample(3, "other.com")).unwrap();
+
+        let rows = select_domain_table(&conn, &"example.com".to_string()).unwrap();
+        assert_eq!(rows.len(), 2);
+        assert!(rows.iter().all(|r| r.domain == "example.com"));
+    }
+
+    // マッチしないドメインを指定したら空 Vec
+    #[test]
+    fn select_domain_table_returns_empty_when_no_match() {
+        let conn = test_conn();
+        insert_sql(&conn, sample(1, "example.com")).unwrap();
+
+        let rows = select_domain_table(&conn, &"unknown.com".to_string()).unwrap();
+        assert!(rows.is_empty());
+    }
 }

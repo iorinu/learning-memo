@@ -22,3 +22,16 @@ pub fn fetch_domain(url: &String) -> String {
         .map(|m| m.as_str().to_string())
         .unwrap_or_default()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn fetch_domain_test() {
+        assert_eq!(
+            fetch_domain(&"https://example.com//foo".to_string()),
+            "example.com".to_string()
+        );
+    }
+}
