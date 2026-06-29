@@ -36,6 +36,9 @@ pub enum Command {
     #[command(alias = "sv")]
     SiteView,
 
+    #[command(alias = "o")]
+    Open { id: i64 },
+
     /// シェル補完スクリプトを生成
     Completion { shell: Shell },
 }

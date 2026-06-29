@@ -1,9 +1,11 @@
+mod browser;
 mod cli;
 mod fetch;
 mod sql;
 mod structure;
 
 use crate::{
+    browser::open_url,
     cli::Cli,
     fetch::{fetch_domain, fetch_title},
     sql::{
@@ -61,6 +63,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         cli::Command::SiteView => {
             view_all_site(&learning_list_table)?;
         }
+
+        cli::Command::Open { id } => {
+            open_url(id, &learning_list_table)?;
+        }
+
         cli::Command::Completion { shell } => {
             let mut cmd = Cli::command();
             let name = cmd.get_name().to_string();
